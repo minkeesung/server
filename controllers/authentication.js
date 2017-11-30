@@ -2,9 +2,18 @@ const jwt = require('jwt-simple')
 const User = require('../models/user')
 const config = require('../config')
 
-// takes user's id and encodes it with a secret
+// takes user's id and encodes it with a secret, returns a token for user
+// jwt is a convention, has sub property, short for subject
+// iat: issued at time
 function tokenForUser(user) {
-  return jwt.encode({ }, config.secret)
+  const timestamp = new Date().getTime()
+  return jwt.encode({ sub: user.id, iat: timestamp }, config.secret)
+}
+
+exports.signin = function(req, res, next) {
+  // User has already had their email and pword auth'd
+  // We just need to give them a token
+  res.send({ token: tokenForUser(req.user) })
 }
 
 exports.signup = function(req, res, next) {
@@ -32,7 +41,7 @@ exports.signup = function(req, res, next) {
     user.save(function(err) {
       if (err) { return next(err)}
 
-      res.json({success: true});
+      res.json({token: tokenForUser(user) });
     });
   })
 

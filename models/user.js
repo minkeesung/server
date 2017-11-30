@@ -29,6 +29,16 @@ userSchema.pre('save', function(next) {
   })
 });
 
+// candidatePassword, is the password that user is attempting to use to sign in
+// this.password is password from user model, it is hashed and salted
+userSchema.methods.comparePassword = function(candidatePassword, callback) {
+  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+    if (err) { return callback(err); }
+
+    callback(null, isMatch); 
+  })
+}
+
 // Create the model class
 const ModelClass = mongoose.model('user', userSchema);
 
